@@ -1,60 +1,114 @@
-/**
- * author sdh
- */
-(function(window){
-    function Model(store){
-        this.store = store;
-    }
+import {getAll, addTodo, deleteTodo, updateTodo, completedAll, clearCompleted} from "./api/todo";
 
-    Model.prototype.read = function(callback,equals, filter){
-        callback = callback || function () {};
-        this.store.getAll(callback);
-    }
+function Model() {
+  this.data = []
+}
 
-    Model.prototype.add = function(title,callback){
-        callback = callback || function () {};
-        var newItem = {
-            id : new Date().getTime(),
-            title: title,
-            completed: false
-        };
-        this.store.add(newItem,function(todos){
-            callback.call(this,newItem,todos);
-        })
-    }
-
-    Model.prototype.remove = function(id,callback){
-        callback = callback || function () {};
-        this.store.remove(id,function(todos){
-            callback.call(this,id,todos);
-        });
-    }
-
-    Model.prototype.update = function(updateItem,callback){
-        callback = callback || function () {};
-        this.store.update(updateItem,function(todos){
-            callback.call(this,updateItem,todos);
-        })
-    }
-
-    Model.prototype.counter = function(callback){
-        callback = callback || function () {};
-        var list = JSON.parse(localStorage.getItem(this._dbName));
-        var counter = {};
-        counter.undone = 0;
-        counter.done = 0;
-        counter.total = list.length;
-        for(let i = 0;i < list.length; i++){
-            if(list[i].completed == false){
-                counter.undone ++;
-            }
-            else{
-                counter.done ++;
-            }
+Model.prototype.getAll = function () {
+  return getAll()
+    .then(res => {
+      return new Promise(resolve => {
+        if (res.status === 200) {
+          this.data = res.data
+          resolve(res.data)
+        } else {
+          resolve([])
         }
-        callback.call(this,counter);
-    }
+      })
+    });
+};
 
-    window.app = window.app || {};
-    window.app.Model = Model;
-}(window))
+Model.prototype.getLocalData = function () {
+  return this.data
+}
+
+Model.prototype.addTodo = function (value) {
+  return addTodo({title: value})
+    .then(res => {
+      return new Promise(resolve => {
+        if (res.status === 200) {
+          this.data.push(res.data)
+          this.data = JSON.parse(JSON.stringify(this.data))
+          resolve(res.data)
+        } else {
+          resolve(null)
+        }
+      })
+    })
+};
+
+Model.prototype.delTodo = function (id) {
+  return deleteTodo(id).then(res => {
+    return new Promise(resolve => {
+      if (res.status === 200) {
+        let i = this.data.findIndex(item => item.id === res.data)
+        this.data.splice(i, 1)
+        this.data = JSON.parse(JSON.stringify(this.data))
+        resolve(res.data)
+      } else {
+        resolve(null)
+      }
+    })
+  })
+};
+
+Model.prototype.updateTodo = function (todo) {
+  return updateTodo(todo).then(res => {
+    return new Promise(resolve => {
+      if (res.status === 200) {
+        let i = this.data.findIndex(item => item.id === res.data.id)
+        this.data.splice(i, 1, res.data)
+        this.data = JSON.parse(JSON.stringify(this.data))
+        resolve(res.data)
+      } else {
+        resolve(null)
+      }
+    })
+  })
+};
+
+Model.prototype.completedAll = function (value) {
+  return completedAll(value).then(res => {
+    return new Promise(resolve => {
+      if (res.status === 200) {
+        this.data = res.data
+        resolve(res.data)
+      } else {
+        resolve(null)
+      }
+    })
+  })
+};
+
+Model.prototype.clearCompleted = function () {
+  return clearCompleted().then(res => {
+    return new Promise(resolve => {
+      if (res.status === 200) {
+        this.data = res.data
+        resolve(res.data)
+      } else {
+        resolve(null)
+      }
+    })
+  })
+};
+
+Model.prototype.watch = function (callback) {
+  let watchValue = []
+  let lastTimeValue = this.data
+  Object.defineProperty(this, "data", {
+    get: function () {
+      // console.log("get：" + watchValue);
+      return watchValue;
+    },
+    set: function (value) {
+      watchValue = value;
+      if (lastTimeValue !== watchValue) {
+        lastTimeValue = watchValue;
+        callback && callback(value)
+      }
+    }
+  });
+}
+
+export default Model;

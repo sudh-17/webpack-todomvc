@@ -102,7 +102,7 @@ module.exports={
         new htmlWebpackPlugin({
             filename:'index.html',//HTML文件名称
             template: './src/index.html', //HTML模板
-            inject: 'head',
+            inject: 'body',
             chunks: ['index'] //对应entry入口的js，按需加载js
         }),
         new webpack.ProvidePlugin({

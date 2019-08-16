@@ -1,109 +1,86 @@
 /***
  * author sdh
  */
-(function(window){
-    function Controller(model,view){
-        this.model = model;
-        this.view = view;
+function Controller(model, view) {
+  this.model = model;
+  this.view = view;
+}
+
+// 初始化
+Controller.prototype.init = function () {
+  this.showAll();
+  this.initAction();
+  this.model.watch(todos => {
+    console.log('change', todos)
+    let unCompletedItems = todos.filter(item => item.completed === false)
+    this.view.setTodoCount(unCompletedItems.length)
+    let completedItems = todos.filter(item => item.completed === true)
+    this.view.clearVisible(completedItems.length > 0)
+    this.view.setToggleAll(completedItems.length > 0 && completedItems.length === todos.length)
+    this.view.toggleAllVisible(todos.length > 0)
+    this.view.footerVisible(todos.length > 0)
+  })
+};
+
+Controller.prototype.showAll = function () {
+  this.model.getAll().then(data => {
+    this.view.showList(data);
+  });
+};
+
+Controller.prototype.initAction = function () {
+  this.view.newTodoAction(value => {
+    this.model.addTodo(value).then(todo => {
+      if (todo) {
+        this.view.addItem(todo)
+      }
+    })
+  })
+
+  this.view.delAction(id => {
+    this.model.delTodo(id).then(removeId => {
+      if (removeId) {
+        this.view.removeItem(removeId)
+      }
+    })
+  })
+
+  this.view.toggleAction((id, value, target) => {
+    this.model.updateTodo({id: id, completed: value})
+      .then(res => {
+        if (!res) {
+          target.checked = !value
+        }
+      })
+  })
+
+  this.view.toggleAllAction(e => {
+    let value = e.target.checked
+    this.model.completedAll(value).then(data => {
+      if (data) {
+        this.view.showList(data)
+      }
+    })
+  })
+
+  this.view.clearAction(e => {
+    this.model.clearCompleted().then(data => {
+      if (data) {
+        this.view.showList(data)
+      }
+    })
+  })
+
+  this.view.filterAction(filter => {
+    let data = this.model.getLocalData()
+    if (filter.toLowerCase() === 'completed') {
+      this.view.showList(data.filter(item => item.completed === true))
+    } else if (filter.toLowerCase() === 'active') {
+      this.view.showList(data.filter(item => item.completed === false))
+    } else {
+      this.view.showList(data)
     }
-    
-    Controller.prototype.showAll = function(){
-        var self = this;
-        self.model.read(function(data){
-            self.view.showItems(data);
-            self.view.counter(data);
-        });
-    }
+  })
+};
 
-    Controller.prototype.showActive = function(){
-        var self = this;
-        var filter = false;
-        self.model.read(function(data){
-            self.view.showItems(data);
-        },function(a,b){
-            if(a == b.completed){
-                return true;
-            }
-        },filter);
-    }
-
-    Controller.prototype.showCompleted = function(){
-        var self = this;
-        var filter = true;
-        self.model.read(function(data){
-            self.view.showItems(data);
-        },function(a,b){
-            if(a == b.completed){
-                return true;
-            }
-        },filter);
-    }
-
-    Controller.prototype.addItem = function(title){
-        var self = this;
-        self.model.add(title,function(item,todos){
-            self.view.addItem(item);
-            self.view.counter(todos);
-        });
-    }
-
-    Controller.prototype.bind = function(){
-        var self = this;
-        self.view.bindAddAction(function(event){
-            if(event.keyCode == 13){
-                var val = qs('.new-todo').value;
-                self.addItem(val);
-                self.view.clearNewTodo();
-            }
-        });
-
-        self.view.bindDelAction(function(event){
-            var target = event.target;
-            var p = target.parentNode.parentNode;
-            var id = p.getAttribute('data-id');
-            self.model.remove(id,function(id,todos){
-                self.view.removeItem(id);
-                self.view.counter(todos);
-            });
-            
-        });
-
-        self.view.bindFilterAction(function(event){
-            var target = event.target;
-            var filter = target.innerText;
-            self.view.setFilter(filter);
-            if(filter == 'All'){
-                self.showAll();
-            }
-            else if(filter == 'Active'){
-                self.showActive();
-            }
-            else if(filter == 'Completed'){
-                self.showCompleted();
-            }
-        });
-
-        self.view.bindToggleAction(function(event){
-            var target = event.target;
-            var li = target.parentNode.parentNode;
-            var id = li.getAttribute('data-id');
-            let item = self.view.getItemObject(id);
-            self.model.update(item,function(updateItem,todos){
-                self.view.updateItem(updateItem);
-                self.view.counter(todos);
-            });
-        
-        });
-
-        self.view.bindToggleAllAction(function(event){
-            var toggleAll = event.target;
-            self.model.changeAllStatus(toggleAll.checked,function(data){
-                self.view.showItems(data);
-            })
-        })
-    }
-
-    window.app = window.app || {};
-    window.app.Controller = Controller;
-}(window))
-
+export default Controller;

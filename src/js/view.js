@@ -1,169 +1,118 @@
 /**
  * author sdh
- * 
+ *
  */
+import { qs, qsa, $on, $delegated, appendChild } from "./util/common.js";
 
-(function(window){
-    function View(){
-        this.todoList = qs('.todo-list');
-        this.newTodo = qs('.new-todo');
-        this.todoCount = qs('.todo-count');
-        this.footer = qs('.footer');
+function View() {
+  this.todoList = qs(".todo-list");
+  this.newTodo = qs(".new-todo");
+  this.todoCount = qs(".todo-count");
+  this.footer = qs(".footer");
+  this.toggleAll = qs('#toggle-all');
+  this.clear = qs('.clear-completed');
+  this.filter = qs('.filters');
+}
+
+function createTemplate(item) {
+  let html = `<li data-id="${item.id}">
+      <div class="view">
+        <input class="toggle" type="checkbox" ${item.completed ? 'checked': ''}>
+        <label>${item.title}</label>
+        <a href="javascript:;" class="destroy"></a>
+      </div>
+    </li>`;
+  return html;
+}
+
+View.prototype.showList = function(data = []) {
+  let list = new Array();
+  data.forEach(item => {
+    let html = createTemplate(item);
+    list.push(html);
+  });
+  this.todoList.innerHTML = list.join("");
+};
+
+View.prototype.addItem = function(item) {
+  let html = createTemplate(item)
+  appendChild(this.todoList, html)
+};
+
+View.prototype.removeItem = function (id) {
+  let li = qs(this.todoList,`[data-id="${id}"]`)
+  this.todoList.removeChild(li)
+}
+
+View.prototype.setTodoCount = function (count) {
+  this.todoCount.innerHTML =
+      `<strong>${ count }</strong> ${count > 1 ? 'items': 'item'} left`
+}
+
+View.prototype.clearVisible = function (visible) {
+  this.clear.style.display = visible ? 'block': 'none'
+}
+
+View.prototype.setToggleAll = function (value) {
+  this.toggleAll.checked = value
+}
+
+View.prototype.toggleAllVisible = function (value) {
+  let toggleAll = qs('[for="toggle-all"]')
+  toggleAll.style.visibility = value ? 'visible': 'hidden'
+}
+
+View.prototype.footerVisible = function (value) {
+  this.footer.style.display = value ? 'block': 'none'
+}
+
+View.prototype.newTodoAction = function (callback) {
+  $on(this.newTodo, 'keyup', function (e) {
+    if (e.keyCode === 13) {
+      if (e.target.value.trim() !== '') {
+        callback && callback(e.target.value)
+        e.target.value = ''
+      }
     }
+  })
+}
 
-    function Template() {
-		this.defaultTemplate
-		=	'<li data-id="{{id}}" class="{{completed}}">'
-		+		'<div class="view">'
-		+			'<input class="toggle" type="checkbox" {{checked}}>'
-		+			'<label>{{title}}</label>'
-		+			'<button class="destroy"></button>'
-		+		'</div>'
-		+	'</li>';
-	}
-    
-    View.prototype.show = function(entry){
-        var view  = '';
-        for(var i= 0 ;i < entry.length; i ++){
-            var template = new Template().defaultTemplate;
-            var id = entry[i].id;
-            var title = entry[i].title;
-            var completed = entry[i].completed ? 'completed' : '';
-            var checked = entry[i].completed ? 'checked' : '';
+View.prototype.delAction = function (callback) {
+  $delegated(this.todoList, '.destroy', 'click', e => {
+    let li = e.target.parentNode.parentNode;
+    callback && callback(li.getAttribute('data-id'));
+  })
+}
 
-            template = template.replace('{{id}}',id)
-                .replace('{{completed}}',completed)
-                .replace('{{checked}}',checked)
-                .replace('{{title}}',title);
+View.prototype.toggleAction = function (callback) {
+  $delegated(this.todoList, '.toggle', 'click', e => {
+    let li = e.target.parentNode.parentNode;
+    callback && callback(li.getAttribute('data-id'), e.target.checked, e.target);
+  })
+}
 
-            view = view + template;
-        }
-        return view;
-    }
+View.prototype.toggleAllAction = function (callback) {
+  $on(this.toggleAll, 'change', function (e) {
+    callback && callback(e)
+  })
+}
 
-    View.prototype.showItems = function(data){
-        var self = this;
-        self.todoList.innerHTML = self.show(data);
-    }
+View.prototype.clearAction = function (callback) {
+  $on(this.clear, 'click', function (e) {
+    callback && callback(e)
+  })
+}
 
-    View.prototype.addItem = function(newItem){
-        var li = document.createElement('li');
-        li.setAttribute('data-id',newItem.id);
-        var div = document.createElement('div');
-        div.className = 'view';
-        var input = document.createElement('input');
-        input.className = 'toggle';
-        input.setAttribute('type','checkbox');
-        var label = document.createElement('label');
-        label.innerHTML = newItem.title;
-        var button = document.createElement('button');
-        button.className = 'destroy';
-        li.appendChild(div);
-        div.appendChild(input);
-        div.appendChild(label);
-        div.appendChild(button);
-        this.todoList.appendChild(li)
-    }
+View.prototype.filterAction = function (callback) {
+  $delegated(this.filter, 'a', 'click', e => {
+    let selectedFilter = e.target
+    let filters = qsa(this.filter, 'a')
+    filters.forEach(filter => {
+      filter.classList.remove('selected')
+    })
+    selectedFilter.classList.add('selected')
+    callback && callback(selectedFilter.innerText);
+  })
+}
 
-    View.prototype.removeItem = function(id){
-        var item = qs('[data-id="'+id+'"]');
-        this.todoList.removeChild(item);
-    }
-
-    View.prototype.getItemObject = function(id){
-        var item = qs('[data-id="'+id+'"]');
-        let title = qs('label',item).innerText;
-        let completed = qs('.toggle',item).checked;
-        var obj = {
-            id: id,
-            title: title,
-            completed: completed
-        };
-        return obj;
-    }
-
-    View.prototype.updateItem = function(updateItem){
-        var id = updateItem.id;
-        var item = qs('[data-id="'+id+'"]');
-        var check = qs('input',item);
-        check.checked = updateItem.completed;
-        item.className = updateItem.completed ? 'completed': '';
-    }
-
-    View.prototype.clearNewTodo = function(){
-        this.newTodo.value = '';
-    }
-
-    View.prototype.counter = function(list){
-        list = list || [];
-        var counter = {};
-        counter.undone = 0;
-        counter.done = 0;
-        counter.total = list.length;
-        for(let i = 0;i < list.length; i++){
-            if(list[i].completed == false){
-                counter.undone ++;
-            }
-            else{
-                counter.done ++;
-            }
-        }
-        if(counter.total == 0){
-            this.footer.style.display = 'none';
-        }
-        else{
-            this.footer.style.display = 'block';
-            if(counter.undone > 1){
-                qs('strong',this.todoCount).innerHTML = '<strong>'+counter.undone+'</strong>'+'items left';
-            }
-            else{
-                qs('strong',this.todoCount).innerHTML = '<strong>'+counter.undone+'</strong>'+'item left';
-            }
-        }
-        
-    }
-
-    View.prototype.setFilter = function(filter){
-        var a = qsa('a',this.footer);
-        for(let i = 0; i < a.length; i++){
-            a[i].className = '';
-        }
-        if(filter == 'All'){
-            var selected = qs('[href="#/"]',this.footer);
-            selected.className = 'selected';
-            
-        }
-        else if(filter == 'Active'){
-            var selected = qs('[href="#/active"]',this.footer);
-            selected.className = 'selected';
-        }
-        else if(filter == 'Completed'){
-            var selected = qs('[href="#/completed"]',this.footer);
-            selected.className = 'selected';
-        }
-    }
-
-    View.prototype.bindAddAction = function(handler){
-        $delegated(document,'.new-todo','keydown',handler);
-    }
-
-    View.prototype.bindDelAction = function(handler){
-        $delegated(this.todoList,'.destroy','click',handler);
-    }
-
-    View.prototype.bindFilterAction = function(handler){
-        $delegated(this.footer,'a','click',handler);
-    }
-
-    View.prototype.bindToggleAction = function(handler){
-        $delegated(this.todoList,'.toggle','click',handler);
-    }
-
-    View.prototype.bindToggleAllAction = function(handler){
-        $delegated(document,'.toggle-all','click',handler);
-    }
-
-
-    window.app = window.app || {};
-    window.app.View = View;
-}(window))
+export default View;

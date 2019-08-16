@@ -1,13 +1,9 @@
-(function(){
+import View from './view.js'
+import Model from './model.js'
+import Controller from './controller.js'
 
-    function Todo(){
-        this.store = new app.Store('todos');
-		this.model = new app.Model(this.store);
-		this.view = new app.View();
-		this.controller = new app.Controller(this.model, this.view);
-    }
+let view = new View();
+let model = new Model();
+let controller = new Controller(model, view);
 
-    var todo = new Todo();
-    todo.controller.showAll();
-    todo.controller.bind();
-}())
+controller.init();

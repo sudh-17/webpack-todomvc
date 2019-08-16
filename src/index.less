@@ -36,7 +36,6 @@ body {
       box-sizing: border-box;
       border: none !important;
       outline: none;
-      
       &::input-placeholder {
         font-style: italic;
         font-weight: 300;
@@ -190,7 +189,13 @@ body {
       color: inherit;
       position: absolute;
       right: 12px;
+      top: 14px;
       font-size: 14px;
+      text-decoration: none;
+      &:hover {
+        color: #ff3c00;
+        text-decoration: underline;
+      }
     }
     &::before {
       content: " ";
