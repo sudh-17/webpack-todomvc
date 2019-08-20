@@ -2,32 +2,34 @@
  * author sdh
  */
 function Controller(model, view) {
-  this.model = model;
-  this.view = view;
+  this.model = model
+  this.view = view
 }
 
 // 初始化
-Controller.prototype.init = function () {
-  this.showAll();
-  this.initAction();
+Controller.prototype.init = function() {
+  this.showAll()
+  this.initAction()
   this.model.watch(todos => {
     let unCompletedItems = todos.filter(item => item.completed === false)
     this.view.setTodoCount(unCompletedItems.length)
     let completedItems = todos.filter(item => item.completed === true)
     this.view.clearVisible(completedItems.length > 0)
-    this.view.setToggleAll(completedItems.length > 0 && completedItems.length === todos.length)
+    this.view.setToggleAll(
+      completedItems.length > 0 && completedItems.length === todos.length
+    )
     this.view.toggleAllVisible(todos.length > 0)
     this.view.footerVisible(todos.length > 0)
   })
-};
+}
 
-Controller.prototype.showAll = function () {
+Controller.prototype.showAll = function() {
   this.model.getAll().then(data => {
-    this.view.showList(data);
-  });
-};
+    this.view.showList(data)
+  })
+}
 
-Controller.prototype.initAction = function () {
+Controller.prototype.initAction = function() {
   this.view.addTodoAction(value => {
     this.model.addTodo(value).then(todo => {
       if (todo && this.view.getFilter() !== 'completed') {
@@ -45,16 +47,15 @@ Controller.prototype.initAction = function () {
   })
 
   this.view.toggleAction((id, value, target) => {
-    this.model.updateTodo({id: id, completed: value})
-      .then(todo => {
-        if (!todo) {
-          target.checked = !value
-          return;
-        }
-        if (this.view.getFilter() !== 'all') {
-          this.view.removeItem(todo.id)
-        }
-      })
+    this.model.updateTodo({ id: id, completed: value }).then(todo => {
+      if (!todo) {
+        target.checked = !value
+        return
+      }
+      if (this.view.getFilter() !== 'all') {
+        this.view.removeItem(todo.id)
+      }
+    })
   })
 
   this.view.toggleAllAction(e => {
@@ -100,13 +101,12 @@ Controller.prototype.initAction = function () {
   })
 
   this.view.editedAction((id, value) => {
-    this.model.updateTodo({id: id, title: value}).then(todo => {
-      console.log(todo)
+    this.model.updateTodo({ id: id, title: value }).then(todo => {
       if (todo) {
         this.view.setItem(todo)
       }
     })
   })
-};
+}
 
-export default Controller;
+export default Controller
