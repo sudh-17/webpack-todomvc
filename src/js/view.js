@@ -75,6 +75,18 @@ View.prototype.getFilter =  function () {
   return qs(this.footer, '.selected').innerText.toLowerCase();
 }
 
+View.prototype.setItem = function (todo) {
+  if (todo) {
+    let item = qs(this.todoList, `[data-id="${ todo.id }"]`)
+    if (todo.title) {
+      qs(item, 'label').innerHTML = todo.title
+    }
+    if (todo.completed) {
+      qs(item, '.toggle').innerHTML = todo.completed
+    }
+  }
+}
+
 View.prototype.addTodoAction = function (callback) {
   $on(this.newTodo, 'keyup', function (e) {
     if (e.keyCode === 13) {
@@ -139,7 +151,6 @@ View.prototype.editingAction = function () {
 
 View.prototype.editedAction = function (callback) {
   $delegated(this.todoList, '.edit', 'blur', e => {
-    console.log(e)
     let edit = e.target
     let li = e.target.parentNode
     li.classList.remove('editing')

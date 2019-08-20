@@ -24,33 +24,21 @@ function $on(target, type, callback, useCapture) {
 
 function $delegated(target, selector, type, handler) {
   function dispatchEvent(event) {
-    var targetElement = event.target;
-    var potentialElements = qsa(selector, target);
-    var hasMatch =
+    let targetElement = event.target;
+    let potentialElements = qsa(selector, target);
+    let hasMatch =
       Array.prototype.indexOf.call(potentialElements, targetElement) >= 0;
 
     if (hasMatch) {
       handler.call(targetElement, event);
     }
   }
-  var useCapture = type === "blur" || type === "focus";
+  let useCapture = type === "blur" || type === "focus";
   $on(target, type, dispatchEvent, useCapture);
 }
 
 function $insertAfter(dom, newNode) {
   dom.parentNode.insertBefore(newNode, dom.nextSibling);
-}
-
-function S4() {
-  return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-}
-// 生成uuid
-function createUUID() {
-  return (
-    S4() + S4() + "-" + S4() + "-" +
-    S4() + "-" + S4() + "-" + S4() +
-    S4() + S4()
-  );
 }
 
 //字符串转 dom
@@ -80,7 +68,6 @@ module.exports = {
   $on,
   $delegated,
   $insertAfter,
-  createUUID,
   parseDom,
   createElement,
   appendChild

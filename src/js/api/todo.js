@@ -1,4 +1,4 @@
-import { host, api } from "./index";
+import {host, api} from "./index";
 import axios from "axios";
 
 var instance = axios.create({
@@ -39,7 +39,7 @@ export function completedAll(value) {
     method: "get",
     params: {
       completed: value
-    } 
+    }
   });
 }
 

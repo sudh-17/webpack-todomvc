@@ -98,7 +98,6 @@ Model.prototype.watch = function (callback) {
   let lastTimeValue = this.data
   Object.defineProperty(this, "data", {
     get: function () {
-      // console.log("get：" + watchValue);
       return watchValue;
     },
     set: function (value) {

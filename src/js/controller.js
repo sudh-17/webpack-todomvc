@@ -11,7 +11,6 @@ Controller.prototype.init = function () {
   this.showAll();
   this.initAction();
   this.model.watch(todos => {
-    console.log('change', todos)
     let unCompletedItems = todos.filter(item => item.completed === false)
     this.view.setTodoCount(unCompletedItems.length)
     let completedItems = todos.filter(item => item.completed === true)
@@ -77,7 +76,14 @@ Controller.prototype.initAction = function () {
   this.view.clearAction(e => {
     this.model.clearCompleted().then(data => {
       if (data) {
-        this.view.showList(data)
+        let filter = this.view.getFilter()
+        if (filter === 'active') {
+          this.view.showList(data.filter(item => item.completed === false))
+        } else if (filter === 'completed') {
+          this.view.showList(data.filter(item => item.completed === true))
+        } else {
+          this.view.showList(data)
+        }
       }
     })
   })
@@ -93,8 +99,13 @@ Controller.prototype.initAction = function () {
     }
   })
 
-  this.view.editedAction(function (id, value) {
-    console.log(id, value)
+  this.view.editedAction((id, value) => {
+    this.model.updateTodo({id: id, title: value}).then(todo => {
+      console.log(todo)
+      if (todo) {
+        this.view.setItem(todo)
+      }
+    })
   })
 };
 
