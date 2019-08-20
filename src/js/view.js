@@ -2,7 +2,7 @@
  * author sdh
  *
  */
-import { qs, qsa, $on, $delegated, appendChild } from "./util/common.js";
+import { qs, qsa, $on, $delegated, appendChild, createElement } from "./util/common.js";
 
 function View() {
   this.todoList = qs(".todo-list");
@@ -12,6 +12,7 @@ function View() {
   this.toggleAll = qs('#toggle-all');
   this.clear = qs('.clear-completed');
   this.filter = qs('.filters');
+  this.init()
 }
 
 function createTemplate(item) {
@@ -23,6 +24,10 @@ function createTemplate(item) {
       </div>
     </li>`;
   return html;
+}
+
+View.prototype.init = function () {
+  this.editingAction()
 }
 
 View.prototype.showList = function(data = []) {
@@ -66,7 +71,11 @@ View.prototype.footerVisible = function (value) {
   this.footer.style.display = value ? 'block': 'none'
 }
 
-View.prototype.newTodoAction = function (callback) {
+View.prototype.getFilter =  function () {
+  return qs(this.footer, '.selected').innerText.toLowerCase();
+}
+
+View.prototype.addTodoAction = function (callback) {
   $on(this.newTodo, 'keyup', function (e) {
     if (e.keyCode === 13) {
       if (e.target.value.trim() !== '') {
@@ -112,6 +121,30 @@ View.prototype.filterAction = function (callback) {
     })
     selectedFilter.classList.add('selected')
     callback && callback(selectedFilter.innerText);
+  })
+}
+
+View.prototype.editingAction = function () {
+  $delegated(this.todoList, 'label', 'dblclick', e => {
+    let view = e.target.parentNode;
+    let li = view.parentNode;
+    li.classList.add('editing')
+    let edit = createElement(`<input type="text" class="edit" value="${e.target.innerText}">`)
+    li.appendChild(edit)
+    edit.focus()
+    // 把光标移至文本选择框最末尾
+    edit.selectionStart = e.target.innerText.length
+  })
+}
+
+View.prototype.editedAction = function (callback) {
+  $delegated(this.todoList, '.edit', 'blur', e => {
+    console.log(e)
+    let edit = e.target
+    let li = e.target.parentNode
+    li.classList.remove('editing')
+    edit.remove()
+    callback && callback(li.getAttribute('data-id'), edit.value)
   })
 }
 

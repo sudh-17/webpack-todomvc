@@ -29,9 +29,9 @@ Controller.prototype.showAll = function () {
 };
 
 Controller.prototype.initAction = function () {
-  this.view.newTodoAction(value => {
+  this.view.addTodoAction(value => {
     this.model.addTodo(value).then(todo => {
-      if (todo) {
+      if (todo && this.view.getFilter() !== 'completed') {
         this.view.addItem(todo)
       }
     })
@@ -47,9 +47,13 @@ Controller.prototype.initAction = function () {
 
   this.view.toggleAction((id, value, target) => {
     this.model.updateTodo({id: id, completed: value})
-      .then(res => {
-        if (!res) {
+      .then(todo => {
+        if (!todo) {
           target.checked = !value
+          return;
+        }
+        if (this.view.getFilter() !== 'all') {
+          this.view.removeItem(todo.id)
         }
       })
   })
@@ -58,7 +62,14 @@ Controller.prototype.initAction = function () {
     let value = e.target.checked
     this.model.completedAll(value).then(data => {
       if (data) {
-        this.view.showList(data)
+        let filter = this.view.getFilter()
+        if (filter === 'active') {
+          this.view.showList(data.filter(item => item.completed === false))
+        } else if (filter === 'completed') {
+          this.view.showList(data.filter(item => item.completed === true))
+        } else {
+          this.view.showList(data)
+        }
       }
     })
   })
@@ -80,6 +91,10 @@ Controller.prototype.initAction = function () {
     } else {
       this.view.showList(data)
     }
+  })
+
+  this.view.editedAction(function (id, value) {
+    console.log(id, value)
   })
 };
 

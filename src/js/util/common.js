@@ -68,6 +68,12 @@ function appendChild(parent, str) {
   });
 }
 
+function createElement (str) {
+  let parent = document.createElement("div");
+  parent.innerHTML = str;
+  return parent.childNodes[0];
+}
+
 module.exports = {
   qs,
   qsa,
@@ -76,5 +82,6 @@ module.exports = {
   $insertAfter,
   createUUID,
   parseDom,
+  createElement,
   appendChild
 };
