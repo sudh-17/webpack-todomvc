@@ -91,12 +91,12 @@ body {
       li {
         border-bottom: 1px solid #ddd;
         position: relative;
-        height: 58px;
+        min-height: 58px;
         &:last-child {
           border: none;
         }
         .view {
-          height: 58px;
+          min-height: 58px;
           position: relative;
           .toggle {
             position: absolute;
@@ -126,7 +126,9 @@ body {
             background-repeat: no-repeat;
             background-position: 13px 16px;
             text-overflow: ellipsis;
-            overflow: hidden;
+            white-space: pre-wrap;
+            word-break: break-all;
+            // overflow: hidden;
             font-weight: lighter;
             background-image: url(./assets/unChecked.png);
           }
