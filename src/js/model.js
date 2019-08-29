@@ -5,7 +5,7 @@ import {
   updateTodo,
   completedAll,
   clearCompleted
-} from './api/todo'
+} from './api'
 
 function Model() {
   this.data = []

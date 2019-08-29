@@ -1,4 +1,4 @@
-import { host, api } from './index'
+import { host, api } from './urls.js'
 import axios from 'axios'
 
 var instance = axios.create({
