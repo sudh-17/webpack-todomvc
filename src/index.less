@@ -7,6 +7,14 @@ div {
 body {
   background: #f5f5f5;
 }
+@keyframes fadeup
+{
+  from {transform: translateY(80px); opacity: 0;}
+  to {transform: translateY(0px); opacity: 1;}
+}
+.moving {
+  animation: fadeup 1.5s;
+}
 .todoapp {
   background: #fff;
   margin: 130px 0 40px 0;

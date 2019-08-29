@@ -166,9 +166,13 @@ View.prototype.editedAction = function(callback) {
     let edit = e.target
     let li = e.target.parentNode
     li.classList.remove('editing')
-    edit.remove()
-    if (edit.value.trim() !== '') {
-      callback && callback(li.getAttribute('data-id'), edit.value)
+    try {
+      edit.remove()
+      if (edit.value.trim() !== '') {
+        callback && callback(li.getAttribute('data-id'), edit.value)
+      }
+    } catch (error) {
+      console.log('node updated')
     }
   }
   $delegated(this.todoList, '.edit', 'blur', e => {

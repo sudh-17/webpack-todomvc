@@ -18,14 +18,17 @@
         </a>
       </div>
     </header>
-    <section class="todoapp">
+    <section class="todoapp moving">
       <header class="header">
         <h1 class="title">todos</h1>
-        <input
-          class="new-todo"
-          placeholder="What needs to be done?"
-          autofocus=""
-        />
+        <form>
+          <input
+            class="new-todo"
+            placeholder="What needs to be done?"
+            autofocus=""
+            required
+          />
+        </form>
       </header>
       <section class="main">
         <input id="toggle-all" class="toggle-all" type="checkbox" />
