@@ -7,6 +7,7 @@ div {
 body {
   background: #f5f5f5;
 }
+// 动画
 @keyframes kf
 {
   from {transform: translateY(80px); opacity: 0;}
@@ -15,6 +16,34 @@ body {
 .fade-up {
   animation: kf 1.5s;
 }
+@keyframes kf2
+{
+  0% {
+    transform: translateX(-380px) translateY(31px) scaleY(3);
+    background: rgba(0, 183, 255, 0.46);
+  }
+  //50% {
+  //  transform: translateX(-380px) scaleY(3);
+  //  background: rgba(0, 183, 255, 0.46);
+  //}
+  100% {transform: translateX(0px) translateY(0px) scaleY(1);
+    background: rgba(0, 183, 255, 0);
+  }
+}
+.slide-right {
+  animation: kf2 0.5s;
+}
+// 过渡
+.slide {
+  transform: translateX(0px);
+  background: rgb(0, 183, 255) !important;
+}
+.slide-away {
+  opacity: 0;
+  transform: translateX(-500px) translateY(-500px) scale(0);
+  transition: all 0.5s;
+}
+
 .todoapp {
   background: #fff;
   margin: 130px 0 40px 0;
@@ -100,6 +129,7 @@ body {
         border-bottom: 1px solid #ddd;
         position: relative;
         min-height: 58px;
+        background: #ffffff;
         &:last-child {
           border: none;
         }

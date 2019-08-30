@@ -51,11 +51,17 @@ View.prototype.showList = function(data = []) {
 View.prototype.addItem = function(item) {
   let html = createTemplate(item)
   appendChild(this.todoList, html)
+  let newItem = qs(this.todoList, `[data-id="${item.id}"]`)
+  newItem.classList.add('slide-right')
 }
 
 View.prototype.removeItem = function(id) {
   let li = qs(this.todoList, `[data-id="${id}"]`)
-  this.todoList.removeChild(li)
+  li.classList.add('slide')
+  li.classList.add('slide-away')
+  setTimeout(() => {
+    this.todoList.removeChild(li)
+  }, 0.5 * 1000)
 }
 
 View.prototype.setTodoCount = function(count) {

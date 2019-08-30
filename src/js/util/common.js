@@ -54,6 +54,7 @@ function appendChild(parent, str) {
   nodes.forEach(node => {
     parent.appendChild(node)
   })
+  return nodes
 }
 
 function createElement(str) {
