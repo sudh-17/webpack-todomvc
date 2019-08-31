@@ -19,6 +19,7 @@ function View() {
   this.toggleAll = qs('#toggle-all')
   this.clear = qs('.clear-completed')
   this.filter = qs('.filters')
+  this.backtop = qs('.backtop-con')
   this.init()
 }
 
@@ -26,8 +27,8 @@ function createTemplate(item) {
   let html = `<li data-id="${item.id}">
       <div class="view">
         <input class="toggle" type="checkbox" ${
-          item.completed ? 'checked' : ''
-        }>
+    item.completed ? 'checked' : ''
+    }>
         <label>${item.title}</label>
         <a href="javascript:;" class="destroy"></a>
       </div>
@@ -35,13 +36,17 @@ function createTemplate(item) {
   return html
 }
 
-View.prototype.init = function() {
+View.prototype.init = function () {
   this.editingAction()
   let route = document.location.hash.split('/')[1] || ''
+  if (route !== '' && route !== 'active' && route !== 'completed') {
+    route = ''
+  }
   this.setFilter(route)
+  this.backTopAciton()
 }
 
-View.prototype.showList = function(data = []) {
+View.prototype.showList = function (data = []) {
   let list = new Array()
   data.forEach(item => {
     let html = createTemplate(item)
@@ -50,42 +55,42 @@ View.prototype.showList = function(data = []) {
   this.todoList.innerHTML = list.join('')
 }
 
-View.prototype.addItem = function(item) {
+View.prototype.addItem = function (item) {
   let html = createTemplate(item)
   appendChild(this.todoList, html)
   let newItem = qs(this.todoList, `[data-id="${item.id}"]`)
   newItem.classList.add('slide-right')
 }
 
-View.prototype.removeItem = function(id) {
+View.prototype.removeItem = function (id) {
   let li = qs(this.todoList, `[data-id="${id}"]`)
   li.classList.add('slide')
   li.classList.add('slide-away')
   setTimeout(() => {
     this.todoList.removeChild(li)
-  }, 0.5 * 1000)
+  }, 0.3 * 1000)
 }
 
-View.prototype.setTodoCount = function(count) {
+View.prototype.setTodoCount = function (count) {
   this.todoCount.innerHTML = `<strong>${count}</strong> ${
     count > 1 ? 'items' : 'item'
-  } left`
+    } left`
 }
 
-View.prototype.clearVisible = function(visible) {
+View.prototype.clearVisible = function (visible) {
   this.clear.style.display = visible ? 'block' : 'none'
 }
 
-View.prototype.setToggleAll = function(value) {
+View.prototype.setToggleAll = function (value) {
   this.toggleAll.checked = value
 }
 
-View.prototype.toggleAllVisible = function(value) {
+View.prototype.toggleAllVisible = function (value) {
   let toggleAll = qs('[for="toggle-all"]')
   toggleAll.style.visibility = value ? 'visible' : 'hidden'
 }
 
-View.prototype.footerVisible = function(value) {
+View.prototype.footerVisible = function (value) {
   this.footer.style.display = value ? 'block' : 'none'
 }
 
@@ -98,11 +103,11 @@ View.prototype.setFilter = function (name = '') {
   selectedFilter.classList.add('selected')
 }
 
-View.prototype.getFilter = function() {
+View.prototype.getFilter = function () {
   return qs(this.footer, '.selected').innerText.toLowerCase()
 }
 
-View.prototype.setItem = function(todo) {
+View.prototype.setItem = function (todo) {
   if (todo) {
     let item = qs(this.todoList, `[data-id="${todo.id}"]`)
     if (todo.title) {
@@ -114,8 +119,8 @@ View.prototype.setItem = function(todo) {
   }
 }
 
-View.prototype.addTodoAction = function(callback) {
-  $on(this.newTodo, 'keyup', function(e) {
+View.prototype.addTodoAction = function (callback) {
+  $on(this.newTodo, 'keyup', function (e) {
     if (e.keyCode === 13) {
       if (e.target.value.trim() !== '') {
         callback && callback(e.target.value)
@@ -125,33 +130,33 @@ View.prototype.addTodoAction = function(callback) {
   })
 }
 
-View.prototype.delAction = function(callback) {
+View.prototype.delAction = function (callback) {
   $delegated(this.todoList, '.destroy', 'click', e => {
     let li = e.target.parentNode.parentNode
     callback && callback(li.getAttribute('data-id'))
   })
 }
 
-View.prototype.toggleAction = function(callback) {
+View.prototype.toggleAction = function (callback) {
   $delegated(this.todoList, '.toggle', 'click', e => {
     let li = e.target.parentNode.parentNode
     callback && callback(li.getAttribute('data-id'), e.target.checked, e.target)
   })
 }
 
-View.prototype.toggleAllAction = function(callback) {
-  $on(this.toggleAll, 'change', function(e) {
+View.prototype.toggleAllAction = function (callback) {
+  $on(this.toggleAll, 'change', function (e) {
     callback && callback(e)
   })
 }
 
-View.prototype.clearAction = function(callback) {
-  $on(this.clear, 'click', function(e) {
+View.prototype.clearAction = function (callback) {
+  $on(this.clear, 'click', function (e) {
     callback && callback(e)
   })
 }
 
-View.prototype.filterAction = function(callback) {
+View.prototype.filterAction = function (callback) {
   $delegated(this.filter, 'a', 'click', e => {
     let selectedFilter = e.target
     let route = selectedFilter.getAttribute('href').split('/')[1]
@@ -160,7 +165,7 @@ View.prototype.filterAction = function(callback) {
   })
 }
 
-View.prototype.editingAction = function() {
+View.prototype.editingAction = function () {
   $delegated(this.todoList, 'label', 'dblclick', e => {
     let view = e.target.parentNode
     let li = view.parentNode
@@ -175,7 +180,7 @@ View.prototype.editingAction = function() {
   })
 }
 
-View.prototype.editedAction = function(callback) {
+View.prototype.editedAction = function (callback) {
   let handler = function (e) {
     let edit = e.target
     let li = e.target.parentNode
@@ -196,6 +201,21 @@ View.prototype.editedAction = function(callback) {
     if (e.keyCode === 13) {
       handler(e)
     }
+  })
+}
+
+View.prototype.backTopAciton = function () {
+  $on(window, 'scroll', e => {
+    let height = window.pageYOffset || document.documentElement.scrollTop
+    if (height > 200) {
+      this.backtop.style.display = 'block'
+    } else {
+      this.backtop.style.display = 'none'
+    }
+  })
+  $on(this.backtop, 'click', e => {
+    document.documentElement.scrollTop = 0
+    document.body.scrollTop = 0
   })
 }
 
