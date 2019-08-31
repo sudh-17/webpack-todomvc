@@ -37,6 +37,8 @@ function createTemplate(item) {
 
 View.prototype.init = function() {
   this.editingAction()
+  let route = document.location.hash.split('/')[1] || ''
+  this.setFilter(route)
 }
 
 View.prototype.showList = function(data = []) {
@@ -85,6 +87,15 @@ View.prototype.toggleAllVisible = function(value) {
 
 View.prototype.footerVisible = function(value) {
   this.footer.style.display = value ? 'block' : 'none'
+}
+
+View.prototype.setFilter = function (name = '') {
+  let filters = qsa(this.filter, 'a')
+  filters.forEach(filter => {
+    filter.classList.remove('selected')
+  })
+  let selectedFilter = qs(this.filter, `[href="#/${name}"]`)
+  selectedFilter.classList.add('selected')
 }
 
 View.prototype.getFilter = function() {
@@ -143,11 +154,8 @@ View.prototype.clearAction = function(callback) {
 View.prototype.filterAction = function(callback) {
   $delegated(this.filter, 'a', 'click', e => {
     let selectedFilter = e.target
-    let filters = qsa(this.filter, 'a')
-    filters.forEach(filter => {
-      filter.classList.remove('selected')
-    })
-    selectedFilter.classList.add('selected')
+    let route = selectedFilter.getAttribute('href').split('/')[1]
+    this.setFilter(route)
     callback && callback(selectedFilter.innerText)
   })
 }

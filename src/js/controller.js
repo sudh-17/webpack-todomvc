@@ -8,7 +8,7 @@ function Controller(model, view) {
 
 // 初始化
 Controller.prototype.init = function() {
-  this.showAll()
+  this.initView()
   this.initAction()
   this.model.watch(todos => {
     let unCompletedItems = todos.filter(item => item.completed === false)
@@ -23,9 +23,15 @@ Controller.prototype.init = function() {
   })
 }
 
-Controller.prototype.showAll = function() {
+Controller.prototype.initView = function() {
   this.model.getAll().then(data => {
-    this.view.showList(data)
+    let filter = this.view.getFilter()
+    if (filter === 'all') {
+      this.view.showList(data)
+    } else {
+      let bool = filter === 'completed' ? true: false
+      this.view.showList(data.filter(item => item.completed === bool))
+    }
   })
 }
 

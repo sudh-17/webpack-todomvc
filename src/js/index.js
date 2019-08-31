@@ -7,4 +7,9 @@ let view = new View()
 let model = new Model()
 let controller = new Controller(model, view)
 
+// let hash = document.location.hash
+// if (hash === '') {
+//   document.location.href = '#/'
+// }
+
 controller.init()
